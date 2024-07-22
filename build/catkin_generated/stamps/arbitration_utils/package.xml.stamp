@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>arbitration_utils</name>
+  <version>0.0.0</version>
+  <description>The arbitration_utils package</description>
+
+  <maintainer email="marie@todo.todo">marie</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>moveit_core</depend>
+  <depend>rosdyn_core</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>object_loader_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf_conversions</depend>
+  
+  
+  <export>
+  </export>
+  
+</package>

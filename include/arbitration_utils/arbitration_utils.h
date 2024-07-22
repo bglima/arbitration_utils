@@ -16,6 +16,7 @@ class ArbitrationUtils
 {
 public:
   ros::NodeHandle nh_;
+  // To understand what is a shared_ptr, read the following link: https://en.cppreference.com/w/cpp/memory/shared_ptr
   std::shared_ptr< moveit::planning_interface::MoveGroupInterface > move_group_;
   std::shared_ptr< planning_scene::PlanningScene > planning_scene_ ;
   robot_model::RobotModelPtr robot_model_; 
@@ -24,6 +25,8 @@ public:
   robot_model_loader::RobotModelLoaderPtr robot_model_loader_;
   
   std::string base_link_;
+  std::string tool_link_;
+  std::string ee_link_;
   
   rosdyn::ChainPtr chain_bt_;
   rosdyn::ChainPtr chain_bee_;
@@ -32,6 +35,11 @@ public:
   
   std::vector<double> lower_bounds_; 
   std::vector<double> upper_bounds_ ;
+  std::string planning_group_;
+  std::vector<std::string> joint_names_;
+  std::vector<double> pos_;
+  std::string alpha_topic_;
+  std::string fis_;
   
   ros::ServiceClient  add_obj_ ;
   ros::Publisher alpha_pub_;

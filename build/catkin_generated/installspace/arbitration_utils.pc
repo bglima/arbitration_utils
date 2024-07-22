@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: arbitration_utils
+Description: Description of arbitration_utils
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: moveit_core rosdyn_core

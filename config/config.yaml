@@ -1,25 +1,31 @@
-planning_group: manipulator 
-base_link:      base_link
-tool_link:      tip
-ee_link:        tool0
+planning_group: panda_manipulator
+base_link:      panda_link0
+tool_link:      panda_hand
+ee_link:        panda_hand_tcp
+target_pose:    target_pose
+# At the moment, the intermediate point is not used
+intermediate_point: intermediate_point
 
 alpha_fis: "alpha_3c.fis"
 
 joint_names:
-  - shoulder_pan_joint
-  - shoulder_lift_joint
-  - elbow_joint
-  - wrist_1_joint
-  - wrist_2_joint
-  - wrist_3_joint
+  - panda_joint1
+  - panda_joint2
+  - panda_joint3
+  - panda_joint4
+  - panda_joint5
+  - panda_joint6
+  - panda_joint7
 
 alpha_topic: "alpha"
 
 max_fl: 0.831
 min_fl: 0.169
 
-add_object: false      # if true adds an obstacle defined in scene_objects.yaml
-ws_boundaries: false   # if false does not consider workspace boundaries
+# if true adds an obstacle defined in scene_objects.yaml
+add_object: true
+# if false does not consider workspace boundaries
+ws_boundaries: true
 
 
 

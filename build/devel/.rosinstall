@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/lorenzo/ws_moveit/src/arbitration_utils/build/devel/setup.sh
