@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     // // Distance between the ee_link and the intermediate_point
     // double vp_clos = au.getDistanceFrom(ee_link, intermediate_point);
 
-    // Here there's a condition in which, if the ws_boundaries param in the config.yaml file is se to false,
+    // Here there's a condition in which, if the ws_boundaries param in the config.yaml file is set to false,
     // a predefined value is set for the reachable workspace index
     if(!ws_boundaries)
       reachable_workspace = 0.45;

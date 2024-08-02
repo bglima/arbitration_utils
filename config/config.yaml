@@ -2,7 +2,7 @@ planning_group: panda_manipulator
 base_link:      panda_link0
 tool_link:      panda_hand
 ee_link:        panda_hand_tcp
-target_pose:    target_pose
+target_pose:    ee_target_pose
 # At the moment, the intermediate point is not used
 intermediate_point: intermediate_point
 
@@ -22,9 +22,9 @@ alpha_topic: "alpha"
 max_fl: 0.831
 min_fl: 0.169
 
-# if true adds an obstacle defined in scene_objects.yaml
+# if true, an obstacle defined in scene_objects.yaml is generated
 add_object: true
-# if false does not consider workspace boundaries
+# if false, workspace boundaries are not considered
 ws_boundaries: true
 
 

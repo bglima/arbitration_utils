@@ -10,9 +10,6 @@
   <node pkg="object_loader" type="context_manager_node" name="context_manager_node" output="screen"/>
   
   <!-- Publish a fake transform. Arguments are: x y z qx qy qz qw frame_id child_frame_id -->
-  <node name="target_pose_tf_publisher" pkg="tf2_ros" type="static_transform_publisher" 
-    args="0.378 -0.694 0.252 1 0 0 0 world target_pose" />
-
   <!-- At the moment, since we are not going to use the intermediate point, we'll avoid it -->
   <!-- <node name="viapoint_tf_publisher" pkg="tf2_ros" type="static_transform_publisher" 
     args="0.15 0 0.5 1 0 0 0 world intermediate_point" />   -->
