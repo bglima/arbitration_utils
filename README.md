@@ -20,7 +20,7 @@ git clone https://github.com/fuzzylite/fuzzylite
 cd fuzzylite
 
 # Compile the package
-make
+cmake -B build/ -DCMAKE_BUILD_TYPE=release -DFL_CPP98=OFF -DFL_USE_FLOAT=OFF -DFL_BUILD_COVERAGE=OFF
 
 # Install into your system
 sudo make install
