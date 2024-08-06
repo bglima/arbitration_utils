@@ -18,7 +18,6 @@ public:
   ros::NodeHandle nh_;
   // To understand what is a shared_ptr, read the following link: https://en.cppreference.com/w/cpp/memory/shared_ptr
   std::shared_ptr< moveit::planning_interface::MoveGroupInterface > move_group_;
-  std::shared_ptr< planning_scene::PlanningScene > planning_scene_ ;
   robot_model::RobotModelPtr robot_model_; 
   robot_state::JointModelGroup* joint_model_group_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;

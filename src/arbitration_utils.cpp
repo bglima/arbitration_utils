@@ -65,14 +65,20 @@ ArbitrationUtils::ArbitrationUtils(ros::NodeHandle nh):nh_(nh)
   move_group_.reset(new moveit::planning_interface::MoveGroupInterface(planning_group_));
   robot_model_ = robot_model_loader::RobotModelLoader("robot_description").getModel();
   joint_model_group_ = robot_model_->getJointModelGroup(planning_group_);
-  planning_scene_.reset(new planning_scene::PlanningScene(robot_model_));
   
   robot_model_loader_.reset(new robot_model_loader::RobotModelLoader("robot_description"));
   
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(robot_model_loader_)); 
   planning_scene_monitor_->startSceneMonitor();
   planning_scene_monitor_->startWorldGeometryMonitor();
-  planning_scene_monitor_->startStateMonitor();
+
+  // Update planning scene monitor with the current Planning Scene state
+  // https://answers.ros.org/question/356183/how-to-use-the-planning-scene-monitor-in-c/
+  bool success = planning_scene_monitor_->requestPlanningSceneState("/get_planning_scene");
+  if (!success)
+  {
+    ROS_ERROR("Could not update planning scene monitor with the current planning scene state.");
+  }
   
   add_obj_ = nh_.serviceClient<object_loader_msgs::AddObjects> ( "add_object_to_scene" );
   ROS_INFO_STREAM("waiting for service: "<< add_obj_.getService());
@@ -146,7 +152,9 @@ double ArbitrationUtils::getManipulability(const std::vector<double> joints)
   // std::cout << "the dimension of the vector j is: \n" << j.size() << "\n";
 
   for (int i=0; i < joints.size(); i++)
+  {
     j(i) = joints[i];
+  }
 
   // std::cout << "the actual joints values are: \n" << j << "\n";
 
@@ -260,105 +268,6 @@ double ArbitrationUtils::getDistanceFrom(const std::string& base, const std::str
   return distance;
   
 }
-
-void ArbitrationUtils::getPlanningScene(ros::NodeHandle& nh, planning_scene::PlanningScenePtr& ret)
-{
-  ros::ServiceClient planning_scene_service;
-  planning_scene_service = nh.serviceClient<moveit_msgs::GetPlanningScene> ( "get_planning_scene" );
-  if ( !planning_scene_service.waitForExistence ( ros::Duration ( 5.0 ) ) )
-  {
-      ROS_ERROR ( "getPlanningScene Failed: service '%s/get_planning_scene' does not exist", nh.getNamespace().c_str() );
-  }
-
-  moveit_msgs::PlanningScene planning_scene_msgs;
-
-  {
-    /// ROBOT_STATE
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.ROBOT_STATE;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    
-    planning_scene_msgs.name = response.scene.name;
-    planning_scene_msgs.robot_state = response.scene.robot_state;
-  }
-  {
-    // WORLD_OBJECT_GEOMETRY && WORLD_OBJECT_NAMES
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.world.collision_objects = response.scene.world.collision_objects;
-  }
-  {
-    // OCTOMAP
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.OCTOMAP;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.world.octomap = response.scene.world.octomap;
-  }
-  {
-    // TRANSFORMS
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.TRANSFORMS;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.fixed_frame_transforms = response.scene.fixed_frame_transforms;
-  }
-  {
-    // ALLOWED_COLLISION_MATRIX
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.ALLOWED_COLLISION_MATRIX;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.allowed_collision_matrix = response.scene.allowed_collision_matrix;
-  }
-  {
-    // LINK_PADDING_AND_SCALING
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.LINK_PADDING_AND_SCALING;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-      ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.link_padding = response.scene.link_padding;
-    planning_scene_msgs.link_scale   = response.scene.link_scale;
-  }
-  {
-    // OBJECT_COLORS
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
-    request.components.components = request.components.LINK_PADDING_AND_SCALING;
-    if ( !planning_scene_service.call ( request, response ) )
-    {
-        ROS_WARN ( "Could not call planning scene service to get object names" );
-    }
-    planning_scene_msgs.object_colors = response.scene.object_colors;
-  }
-
-  ret->setPlanningSceneMsg ( planning_scene_msgs );
-
-  return;
-}
-
-
 void ArbitrationUtils::addObj()
 {
   ROS_DEBUG_STREAM("adding object");
@@ -374,27 +283,32 @@ void ArbitrationUtils::addObj()
     obj.pose.header.frame_id = base_link_;
     srv.request.objects.push_back(obj);
   }
-  
   add_obj_.call(srv);
-  
 }
 
 
 double ArbitrationUtils::checkWorldCollisionDistance()
-{  
-  planning_scene_monitor::LockedPlanningSceneRW ps = planning_scene_monitor::LockedPlanningSceneRW(planning_scene_monitor_); 
-  // Get the state at which the robot is assumed to be.
-  robot_state::RobotState robot_state = ps->getCurrentStateNonConst();
-  // std::cout << "robot_state: \n" << robot_state << "\n";
+{
+  // Receive a pointer to the planning scene in ReadOnly mode to read the current state.
+  bool success = planning_scene_monitor_->requestPlanningSceneState("/get_planning_scene");
+  if (!success)
+  {
+    ROS_ERROR("Could not update planning scene monitor with the current planning scene state.");
+  }
 
-  collision_detection::AllowedCollisionMatrix *acm = &ps->getAllowedCollisionMatrixNonConst();
+  // The ReadOnly mode is so as not to interfeer with other publishers
+  planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene_read_only = planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_); 
+
+  // Get the state at which the robot is assumed to be.
+  robot_state::RobotState robot_state = locked_planning_scene_read_only->getCurrentState();
+
+  // Get the current allowed collision detection matrix
+  const collision_detection::AllowedCollisionMatrix *acm = &locked_planning_scene_read_only->getAllowedCollisionMatrix();
   
-  getPlanningScene(nh_, planning_scene_);
-  
-  double dist = planning_scene_->distanceToCollision(robot_state, *acm);
-  // std::cout << acm << "\n";
-  // std::cout << "dist is equal to: \n" << dist << "\n";
-  
+  // Calculate the distance based on the allowed collision matrix
+  double dist = locked_planning_scene_read_only->distanceToCollision(robot_state, *acm);
+
+  // If distance is too close, inform a collision
   if (dist <= 0.0001)
   {
     ROS_INFO_STREAM(RED<<"careful ! robot in collision");
@@ -403,7 +317,6 @@ double ArbitrationUtils::checkWorldCollisionDistance()
   
   return dist;
 }
-
 
 
 double ArbitrationUtils::computeAlpha(const double& dist, const double& reach, const double& man, const double& clos)
