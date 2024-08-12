@@ -37,13 +37,14 @@ int main(int argc, char **argv)
 
   ros::Duration(0.1).sleep();
   
-  ros::Rate rate(30);
+  double dt = 1/30;
+  ros::Rate rate(1/dt);
   
-  ros::Publisher pubd = nh.advertise<std_msgs::Float32>("/distance_collision_object", 1000);
-  ros::Publisher pubr = nh.advertise<std_msgs::Float32>("/reachable_workspace", 1000);
-  ros::Publisher pubm = nh.advertise<std_msgs::Float32>("/manipulability_index", 1000);
-  ros::Publisher pubc = nh.advertise<std_msgs::Float32>("/closeness_to_target", 1000);
-  ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 1000);
+  ros::Publisher pubd = nh.advertise<std_msgs::Float32>("/distance_collision_object", 30);
+  ros::Publisher pubr = nh.advertise<std_msgs::Float32>("/reachable_workspace", 30);
+  ros::Publisher pubm = nh.advertise<std_msgs::Float32>("/manipulability_index", 30);
+  ros::Publisher pubc = nh.advertise<std_msgs::Float32>("/closeness_to_target", 30);
+  ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 30);
   // ros::Publisher pubvp = nh.advertise<std_msgs::Float32>("/vp_closeness", 1000);
 
   std::string ee_link;

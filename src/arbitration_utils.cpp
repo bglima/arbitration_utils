@@ -268,6 +268,7 @@ double ArbitrationUtils::getDistanceFrom(const std::string& base, const std::str
   return distance;
   
 }
+
 void ArbitrationUtils::addObj()
 {
   ROS_DEBUG_STREAM("adding object");

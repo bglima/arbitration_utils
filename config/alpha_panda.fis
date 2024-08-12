@@ -1,0 +1,56 @@
+[System]
+Name='alpha_3c'
+Type='mamdani'
+Version=2.0
+NumInputs=4
+NumOutputs=1
+NumRules=4
+AndMethod='min'
+OrMethod='max'
+ImpMethod='min'
+AggMethod='max'
+DefuzzMethod='centroid'
+
+[Input1]
+Name='distance'
+Range=[0 0.3]
+NumMFs=2
+MF1='low':'trapmf',[0 0 0.1 0.25]
+MF2='ok':'trapmf',[0.1 0.25 0.3 0.3]
+
+[Input2]
+Name='manipulability'
+Range=[0 0.2]
+NumMFs=2
+MF1='low':'trimf',[-0.08 0 0.05]
+MF2='fine':'trapmf',[0 0.05 0.2 0.2]
+
+[Input3]
+Name='reach'
+Range=[0 1]
+NumMFs=3
+MF1='close':'trapmf',[-0.36 -0.04 0.3 0.4]
+MF2='fine':'trapmf',[0.3 0.4 0.8 0.9]
+MF3='far':'trapmf',[0.8 0.9 1.04 1.36]
+
+[Input4]
+Name='endpoint'
+Range=[0 1]
+NumMFs=3
+MF1='close':'trimf',[-0.4 0 0.15]
+MF2='medium':'trimf',[0 0.15 0.3]
+MF3='far':'trapmf',[0.15 0.3 1.04 1.36]
+
+[Output1]
+Name='alpha'
+Range=[0 1]
+NumMFs=3
+MF1='low':'trapmf',[-0.36 -0.04 0.1 0.5]
+MF2='shared':'trimf',[0.1 0.5 0.9]
+MF3='high':'trapmf',[0.5 0.9 1 1.36]
+
+[Rules]
+1 1 1 1, 1 (1) : 2
+1 1 3 1, 1 (1) : 2
+2 2 2 3, 3 (1) : 1
+2 2 2 2, 2 (1) : 1

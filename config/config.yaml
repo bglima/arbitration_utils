@@ -6,7 +6,7 @@ target_pose:    ee_target_pose
 # At the moment, the intermediate point is not used
 intermediate_point: intermediate_point
 
-alpha_fis: "alpha_3c.fis"
+alpha_fis: "alpha_panda.fis"
 
 joint_names:
   - panda_joint1
