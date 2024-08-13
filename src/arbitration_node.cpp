@@ -2,6 +2,14 @@
 #include <arbitration_utils/utils.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
+
+bool human_lead_enabled = false;
+
+void human_leadCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+     human_lead_enabled = msg->data;
+}
 
 
 int main(int argc, char **argv)
@@ -37,15 +45,18 @@ int main(int argc, char **argv)
 
   ros::Duration(0.1).sleep();
   
-  double dt = 1/30;
-  ros::Rate rate(1/dt);
+  double rate_hz = 30;
+  double dt = 1/rate_hz;
+  ros::Rate rate(rate_hz);
   
-  ros::Publisher pubd = nh.advertise<std_msgs::Float32>("/distance_collision_object", 30);
-  ros::Publisher pubr = nh.advertise<std_msgs::Float32>("/reachable_workspace", 30);
-  ros::Publisher pubm = nh.advertise<std_msgs::Float32>("/manipulability_index", 30);
-  ros::Publisher pubc = nh.advertise<std_msgs::Float32>("/closeness_to_target", 30);
-  ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 30);
-  // ros::Publisher pubvp = nh.advertise<std_msgs::Float32>("/vp_closeness", 1000);
+  ros::Publisher pubd = nh.advertise<std_msgs::Float32>("/distance_collision_object", 1);
+  ros::Publisher pubr = nh.advertise<std_msgs::Float32>("/reachable_workspace", 1);
+  ros::Publisher pubm = nh.advertise<std_msgs::Float32>("/manipulability_index", 1);
+  ros::Publisher pubc = nh.advertise<std_msgs::Float32>("/closeness_to_target", 1);
+  ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 1);
+    // ros::Publisher pubvp = nh.advertise<std_msgs::Float32>("/vp_closeness", 1000);
+
+  ros::Subscriber enable_human_leading_sub = nh.subscribe<std_msgs::Bool>("/human_lead_enabled", 1, human_leadCallback);  
 
   std::string ee_link;
   nh.getParam("ee_link", ee_link);
@@ -57,16 +68,31 @@ int main(int argc, char **argv)
   std::cout << "\n";
   ROS_INFO_STREAM("The inizialization part is completed. Now the computational part starts ...");
 
+  std_msgs::Float32 float_msg;
+  
+  ros::Time time_now;
+
   while(ros::ok())
   {
+    time_now = ros::Time::now();
     // Manipulability index
     double manipulability_index = au.getCurrentManipulability();
+    ROS_WARN_THROTTLE(2.0, "getCurrentManipulability took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
+    time_now = ros::Time::now();
     // Reachable workspace
     double reachable_workspace = au.getReach();
-    // distance to object collision
+    ROS_WARN_THROTTLE(2.0, "reachable_workspace took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
+    time_now = ros::Time::now();
+        // distance to object collision
     double distance_to_collision = au.checkWorldCollisionDistance();
+    ROS_WARN_THROTTLE(2.0, "distance_to_collision took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
+    time_now = ros::Time::now();
+    
     // Distance between ee_link and target_pose
     double closeness_to_target = au.getDistanceFrom(ee_link,target_pose);
+    ROS_WARN_THROTTLE(2.0, "closeness_to_target took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
+    time_now = ros::Time::now();
+    
     // // Distance between the ee_link and the intermediate_point
     // double vp_clos = au.getDistanceFrom(ee_link, intermediate_point);
 
@@ -75,40 +101,39 @@ int main(int argc, char **argv)
     if(!ws_boundaries)
       reachable_workspace = 0.45;
     
-    double alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
+    double alpha;
+    if (human_lead_enabled == false)
+    {
+      alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
+    }
+    else
+    {
+      alpha = 0.999;
+    }
+
     ROS_INFO_STREAM_THROTTLE(2.0, CYAN << "manipulability: " << manipulability_index << 
                                   BLUE << ", reacheable_workspace: " << reachable_workspace << 
                                   GREEN << ", distance_to_collision: " << distance_to_collision << 
                                   YELLOW << ", closeness_to_target: " << closeness_to_target << 
                                   MAGENTA << " ---> alpha: " << alpha);
     
-    au.publishAlpha(alpha);
-    
-    {
-      std_msgs::Float32 m;
-      m.data = distance_to_collision;
-      pubd.publish(m);
-    }
-    {
-      std_msgs::Float32 m;
-      m.data = reachable_workspace;
-      pubr.publish(m);
-    }
-    {
-      std_msgs::Float32 m;
-      m.data = manipulability_index;
-      pubm.publish(m);
-    }
-    {
-      std_msgs::Float32 m;
-      m.data = alpha;
-      puba.publish(m);
-    }
-    {
-      std_msgs::Float32 m;
-      m.data = closeness_to_target;
-      pubc.publish(m);
-    }
+    ROS_WARN_THROTTLE(2.0, "computeAlpha took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
+    time_now = ros::Time::now();
+
+    float_msg.data = alpha;
+    puba.publish(float_msg);
+
+    float_msg.data = distance_to_collision;
+    pubd.publish(float_msg);
+
+    float_msg.data = reachable_workspace;
+    pubr.publish(float_msg);
+
+    float_msg.data = manipulability_index;
+    pubm.publish(float_msg);
+
+    float_msg.data = closeness_to_target;
+    pubc.publish(float_msg);
     // {
     //   std_msgs::Float32 m;
     //   m.data = vp_clos;

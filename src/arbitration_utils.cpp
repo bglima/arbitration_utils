@@ -207,18 +207,26 @@ double ArbitrationUtils::getCurrentManipulability()
 
 double ArbitrationUtils::getReach()
 {
-  std::vector<double> cjv = move_group_->getCurrentJointValues();
+  tf::StampedTransform transform;
+  listener_.waitForTransform(base_link_, tool_link_, ros::Time::now(), ros::Duration(0.001));
+  listener_.lookupTransform(base_link_, tool_link_, ros::Time(0), transform);
 
-  // To understand how Eigen::Map, go to the followng link: https://eigen.tuxfamily.org/dox/classEigen_1_1Map.html
-  Eigen::VectorXd vec = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(cjv.data(), cjv.size());
-  // In here, you print a vector with the current joint values
-  // std::cout << "the variable vec is: \n" << vec << "\n";
-  // In here, you compute basically the forward kinematics to pass from joint values to task space values
-  Eigen::Affine3d T_be = chain_bee_->getTransformation(vec);
-  // In here, yout print only the task space translation from the base frame to the ee_frame (defined as panda_hand_tcp)
-  // std::cout << "the variable T_be is: \n" << T_be.translation() << "\n"; 
-  // In Here, the norm of the translation vector from base frame to ee_frame is computed to get the reachable workspace
-  double reach = T_be.translation().norm();
+  // std::vector<double> cjv = move_group_->getCurrentJointValues();
+
+  // // To understand how Eigen::Map, go to the followng link: https://eigen.tuxfamily.org/dox/classEigen_1_1Map.html
+  // Eigen::VectorXd vec = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(cjv.data(), cjv.size());
+  // // In here, you print a vector with the current joint values
+  // // std::cout << "the variable vec is: \n" << vec << "\n";
+  // // In here, you compute basically the forward kinematics to pass from joint values to task space values
+  // Eigen::Affine3d T_be = chain_bee_->getTransformation(vec);
+  // // In here, yout print only the task space translation from the base frame to the ee_frame (defined as panda_hand_tcp)
+  // // std::cout << "the variable T_be is: \n" << T_be.translation() << "\n"; 
+  // // In Here, the norm of the translation vector from base frame to ee_frame is computed to get the reachable workspace
+  // double reach = T_be.translation().norm();
+  Eigen::Vector3d tool_link_pose;
+  // tf::vectorTFToEigen converts a tf Vector3 into an Eigen Vector3d
+  tf::vectorTFToEigen(transform.getOrigin(),tool_link_pose);
+  double reach = tool_link_pose.norm();
   
   return reach; 
 }
@@ -227,11 +235,11 @@ double ArbitrationUtils::getDistanceFrom(const std::string& base, const std::str
 {
   tf::StampedTransform transform;
   // tf::StampedTransform tt; // used for the intermediate point that, in our case, is not considered
-  double distance = 0.5;
+  double distance = 0;
 
   try
   {
-    listener_.waitForTransform(base, target, ros::Time::now(), ros::Duration(5.0));
+    listener_.waitForTransform(base, target, ros::Time::now(), ros::Duration(0.001));
     listener_.lookupTransform(base, target, ros::Time(0), transform);
     // listener_.lookupTransform(base, target, ros::Time(0), tt);
     
