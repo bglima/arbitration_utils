@@ -101,27 +101,26 @@ int main(int argc, char **argv)
     if(!ws_boundaries)
       reachable_workspace = 0.45;
     
-    double alpha;
-    if (human_lead_enabled == false)
-    {
-      alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
-    }
-    else
-    {
-      alpha = 0.999;
-    }
+    //double alpha;
+    //if (human_lead_enabled == false)
+    //{
+    //  alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
+   // }
+   // else
+    //{
+    //  alpha = 0.999;
+   // }
 
     ROS_INFO_STREAM_THROTTLE(2.0, CYAN << "manipulability: " << manipulability_index << 
                                   BLUE << ", reacheable_workspace: " << reachable_workspace << 
                                   GREEN << ", distance_to_collision: " << distance_to_collision << 
-                                  YELLOW << ", closeness_to_target: " << closeness_to_target << 
-                                  MAGENTA << " ---> alpha: " << alpha);
+                                  YELLOW << ", closeness_to_target: " << closeness_to_target);
     
     ROS_WARN_THROTTLE(2.0, "computeAlpha took: %.4f seconds.", (ros::Time::now() - time_now).toSec() );
     time_now = ros::Time::now();
 
-    float_msg.data = alpha;
-    puba.publish(float_msg);
+    //float_msg.data = alpha;
+    //puba.publish(float_msg);
 
     float_msg.data = distance_to_collision;
     pubd.publish(float_msg);
