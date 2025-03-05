@@ -97,14 +97,15 @@ int main(int argc, char **argv)
     // double vp_clos = au.getDistanceFrom(ee_link, intermediate_point);
 
     // Here there's a condition in which, if the ws_boundaries param in the config.yaml file is set to false,
-    // a predefined value is set for the reachable workspace index
+    // a predefined value is set for the reachable workspace index.
     if(!ws_boundaries)
       reachable_workspace = 0.45;
     
     double alpha;
     if (human_lead_enabled == false)
     {
-      alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
+      alpha = 0.001;
+      // alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
     }
     else
     {
