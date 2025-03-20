@@ -4,6 +4,7 @@
   <!-- Loading the parameters defined in the .yaml configuration files -->
   <rosparam command="load" file="$(find arbitration_utils)/config/config.yaml" />
   <rosparam command="load" file="$(find arbitration_utils)/config/scene_objects.yaml" />
+  <rosparam command="load" file="$(find differential_gt)/config/dgt_config.yaml" />
   <!-- Running the arbitration node that computes alpha -->
   <node pkg="arbitration_utils" type="arbitration_node" name="arbitration_node" output="screen"/>
   <!--  -->

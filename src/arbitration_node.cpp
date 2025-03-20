@@ -5,6 +5,8 @@
 #include <std_msgs/Bool.h>
 
 bool human_lead_enabled = false;
+bool GT_disabled;
+double alpha;
 
 void human_leadCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -38,6 +40,19 @@ int main(int argc, char **argv)
   {
     ROS_WARN_STREAM(nh.getNamespace() << " /no object found. default false");
     ws_boundaries = true;
+  }
+
+  // Check if the parameter defined in the dgt_config.yaml file is set for the GT_disabled and the alpha
+  if(!nh.getParam("GT_disabled", GT_disabled))
+  {
+    GT_disabled = "false";
+    ROS_WARN_STREAM(nh.getNamespace() << "GT_disabled not set! default: " << GT_disabled);
+  }
+
+  if(!nh.getParam("alpha", alpha))
+  {
+      alpha = 0.999;
+      ROS_WARN_STREAM(nh.getNamespace() << "alpha value not set! default: " << alpha);
   }
 
   if (add_obj)
@@ -100,16 +115,12 @@ int main(int argc, char **argv)
     // a predefined value is set for the reachable workspace index.
     if(!ws_boundaries)
       reachable_workspace = 0.45;
-    
-    double alpha;
-    if (human_lead_enabled == false)
-    {
-      alpha = 0.001;
-      // alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
-    }
-    else
+  
+    // if condition for enabling the human to lead the final placement
+    if (human_lead_enabled == true)
     {
       alpha = 0.999;
+      // alpha = au.computeAlpha(distance_to_collision, reachable_workspace, manipulability_index, closeness_to_target);
     }
 
     ROS_INFO_STREAM_THROTTLE(2.0, CYAN << "manipulability: " << manipulability_index << 

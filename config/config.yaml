@@ -27,5 +27,3 @@ add_object: false
 # if false, workspace boundaries are not considered
 ws_boundaries: true
 
-
-
