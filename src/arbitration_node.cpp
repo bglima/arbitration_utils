@@ -68,8 +68,8 @@ int main(int argc, char **argv)
   ros::Publisher pubr = nh.advertise<std_msgs::Float32>("/reachable_workspace", 1);
   ros::Publisher pubm = nh.advertise<std_msgs::Float32>("/manipulability_index", 1);
   ros::Publisher pubc = nh.advertise<std_msgs::Float32>("/closeness_to_target", 1);
-  ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 1);
-    // ros::Publisher pubvp = nh.advertise<std_msgs::Float32>("/vp_closeness", 1000);
+  // This publisher is commented since it may be the cause of the problems
+  // ros::Publisher puba = nh.advertise<std_msgs::Float32>("/alpha", 1);
 
   ros::Subscriber enable_human_leading_sub = nh.subscribe<std_msgs::Bool>("/human_lead_enabled", 1, human_leadCallback);  
 
@@ -133,7 +133,8 @@ int main(int argc, char **argv)
     time_now = ros::Time::now();
 
     float_msg.data = alpha;
-    puba.publish(float_msg);
+    // This publishing action is commented since at the moment is not used
+    // puba.publish(float_msg);
 
     float_msg.data = distance_to_collision;
     pubd.publish(float_msg);
